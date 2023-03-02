@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { column, beforeSave, BaseModel, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import Curso from 'App/Models/Curso'
 
 export default class User extends BaseModel {
@@ -25,8 +25,8 @@ export default class User extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @manyToMany(() => Curso)
-  public cursos: ManyToMany<typeof Curso>
+  @hasMany(() => Curso)
+  public cursos: HasMany<typeof Curso>
 
   @beforeSave()
   public static async hashPassword(user: User) {

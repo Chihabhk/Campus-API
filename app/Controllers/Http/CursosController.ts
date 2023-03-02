@@ -14,42 +14,54 @@ export default class CursosController {
 
   public async store({ request, response, auth }: HttpContextContract) {
     try {
-      await auth.authenticate()
+      const user = await auth.authenticate()
+      if (!user) {
+        throw new Error('El usuario no está autenticado')
+      }
       const { nombre, descripcion } = request.body()
-      const curso = await Curso.create({ nombre, descripcion })
+      const curso = await user.related('cursos').create({ nombre, descripcion })
       response.status(201).json(curso)
     } catch (error) {
-      response.unauthorized({ error })
+      response.status(500).json({ error: error.message })
     }
   }
 
   public async update({ params, request, response, auth }: HttpContextContract) {
     try {
-      await auth.authenticate()
+      const user = await auth.authenticate()
+      if (!user) {
+        throw new Error('El usuario no está autenticado')
+      }
       const curso = await Curso.findOrFail(params.id)
+      if (curso.userId !== user.id) {
+        throw new Error('No tiene permiso para modificar este curso')
+      }
       const { nombre, descripcion } = request.body()
       curso.merge({ nombre, descripcion })
       await curso.save()
       response.status(200).json(curso)
     } catch (error) {
-      response.unauthorized({ error: 'No autorizado' })
+      response.status(500).json({ error: error.message })
     }
   }
 
   public async destroy({ params, response, auth }: HttpContextContract) {
     try {
       const user = await auth.authenticate()
-      const curso = await Curso.query()
-        .where('id', params.id)
-        .where('autor_Id', user.id)
-        .firstOrFail()
+      if (!user) {
+        throw new Error('El usuario no está autenticado')
+      }
+      const curso = await Curso.findOrFail(params.id)
+      if (curso.userId !== user.id) {
+        throw new Error('No tiene permiso para eliminar este curso')
+      }
       await curso.delete()
       response.status(200)
       return {
         message: 'Curso eliminado correctamente',
       }
     } catch (error) {
-      response.unauthorized({ error: 'No autorizado' })
+      response.status(500).json({ error: error.message })
     }
   }
 }

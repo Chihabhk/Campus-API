@@ -1,16 +1,17 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Curso from 'App/Models/Curso'
+import Leccion from 'App/Models/Leccion'
 import Modulo from 'App/Models/Modulo'
 
-export default class ModulosController {
+export default class LeccionesController {
   public async index({ params, response }: HttpContextContract) {
     try {
-      const cursoId = params.cursoId
-      if (!cursoId) {
-        return response.status(400).json({ error: 'Se requiere el ID del curso' })
+      const moduloId = params.moduloId
+      if (!moduloId) {
+        return response.status(400).json({ error: 'Se requiere el ID del modulo' })
       }
-      const modulos = await Modulo.query().where('cursoId', cursoId)
-      response.status(200).json(modulos)
+      const lecciones = await Leccion.query().where('moduloId', moduloId)
+      response.status(200).json(lecciones)
     } catch (error) {
       response.status(500).json({ error: error.message })
     }
@@ -18,12 +19,12 @@ export default class ModulosController {
 
   public async show({ params, response }: HttpContextContract) {
     try {
-      const cursoId = params.cursoId
-      if (!cursoId) {
-        return response.status(400).json({ error: 'Se requiere el ID del curso' })
+      const moduloId = params.moduloId
+      if (!moduloId) {
+        return response.status(400).json({ error: 'Se requiere el ID del módulo' })
       }
-      const modulo = await Modulo.findOrFail(params.id)
-      response.status(200).json(modulo)
+      const leccion = await Leccion.findOrFail(params.id)
+      response.status(200).json(leccion)
     } catch (error) {
       response.status(500).json({ error: error.message })
     }
@@ -40,8 +41,9 @@ export default class ModulosController {
         throw new Error('No tiene permiso para modificar este módulo')
       }
       const { nombre, descripcion } = request.body()
-      const modulo = await curso.related('modulos').create({ nombre, descripcion })
-      response.status(201).json(modulo)
+      const modulo = await Modulo.findOrFail(params.moduloId)
+      const leccion = await modulo.related('lecciones').create({ nombre, descripcion })
+      response.status(201).json(leccion)
     } catch (error) {
       response.status(500).json({ error: error.message })
     }
@@ -57,11 +59,11 @@ export default class ModulosController {
       if (curso.userId !== user.id) {
         throw new Error('No tiene permiso para modificar este módulo')
       }
-      const modulo = await Modulo.findOrFail(params.id)
+      const leccion = await Leccion.findOrFail(params.id)
       const { nombre, descripcion } = request.body()
-      modulo.merge({ nombre, descripcion })
-      await modulo.save()
-      response.status(200).json(modulo)
+      leccion.merge({ nombre, descripcion })
+      await leccion.save()
+      response.status(200).json(leccion)
     } catch (error) {
       response.status(500).json({ error: error.message })
     }
@@ -75,13 +77,13 @@ export default class ModulosController {
       }
       const curso = await Curso.findOrFail(params.cursoId)
       if (curso.userId !== user.id) {
-        throw new Error('No tiene permiso para eliminar este módulo')
+        throw new Error('No tiene permiso para modificar este módulo')
       }
-      const modulo = await Modulo.findOrFail(params.id)
-      await modulo.delete()
+      const leccion = await Leccion.findOrFail(params.id)
+      await leccion.delete()
       response.status(200)
       return {
-        message: 'Módulo eliminado correctamente',
+        message: 'Lección eliminada correctamente',
       }
     } catch (error) {
       response.status(500).json({ error: error.message })

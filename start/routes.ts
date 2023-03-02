@@ -6,5 +6,11 @@ Route.group(() => {
 }).prefix('auth')
 
 Route.resource('cursos', 'CursosController').apiOnly()
-Route.resource('modulos', 'ModulosController').apiOnly()
-Route.resource('lecciones', 'LeccionesController').apiOnly()
+
+Route.group(() => {
+  Route.resource('modulos', 'ModulosController').apiOnly()
+}).prefix('/curso/:cursoId')
+
+Route.group(() => {
+  Route.resource('lecciones', 'LeccionesController').apiOnly()
+}).prefix('/curso/:cursoId/modulo/:moduloId')

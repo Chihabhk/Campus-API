@@ -13,6 +13,9 @@ export default class Modulo extends BaseModel {
   @column()
   public descripcion: string
 
+  @column()
+  public cursoId: number
+
   @belongsTo(() => Curso, { foreignKey: 'curso_id' })
   public curso_id: BelongsTo<typeof Curso>
 
